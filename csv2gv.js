@@ -66,11 +66,40 @@ csv()
   	translit(row[3].substring(0,1)) +
 	(row[27].replace(/\s+/g, "") ? (row[27].split(" "))[2] : "NoYear");
   
-  console.log('#'+index+' '+ '-' + ' '+JSON.stringify(diss_id));
-
-  var disser_node = g.addNode( diss_id, {"label" : wordwrap(row[4].replace(/\"/g, "'").replace(/\n/g, " "), 30, '\\n'), "shape" : "box" } );
+  var disser_node = g.addNode( diss_id, {
+	  "label" : wordwrap(row[4].replace(/\"/g, "'").replace(/\n/g, " "), 30, '\\n'), 
+	  "shape" : "box" }
+  );
   disser_node.set( "style", "filled" );
 
+  console.log('#'+index+' '+ '-' + ' '+JSON.stringify(diss_id));
+
+  // expects 3-element array of ФИО
+  function add_person_node( ФИО ) {
+
+	  return g.addNode( translit(ФИО.join('')), {
+		  "label" : ФИО.join('\\n')
+	  } );
+	  
+  }
+  
+  var author_node = add_person_node(row.slice(1,4));
+  g.addEdge( author_node, disser_node );
+  
+  var adv1_node = add_person_node(row.slice(8,11));
+  g.addEdge( adv1_node, disser_node );
+
+  var adv2_node = add_person_node(row.slice(11,14));
+  g.addEdge( adv2_node, disser_node );
+
+//  var opp1_node = add_person_node(row.slice(14,17));
+//  g.addEdge( opp1_node, disser_node );
+//
+//  var opp2_node = add_person_node(row.slice(17,20));
+//  g.addEdge( opp2_node, disser_node );
+//
+//  var opp3_node = add_person_node(row.slice(20,24));
+//  g.addEdge( opp3_node, disser_node );
 })
 .on('error', function(error){
   console.log(error.message);
