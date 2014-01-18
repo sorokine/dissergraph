@@ -30,6 +30,16 @@ function wordwrap( str, width, brk, cut ) {
     return str.match( RegExp(regex, 'g') ).join( brk );
  
 }
+
+var stream = require('stream');
+var filter = new stream.Transform( { objectMode: true } );
+ 
+filter._transform = function (chunk, encoding, done) {
+     var str = chunk.toString();
+     this.push(str.replace(/\r/g, ' '));
+     done();
+};
+
 /**
  * CSV record
  * 
@@ -56,7 +66,7 @@ function wordwrap( str, width, brk, cut ) {
  */
 
 csv()
-.from.stream(fs.createReadStream(__dirname+'/db.txt'), { delimiter : '|'})
+.from.stream(fs.createReadStream(__dirname+'/db.txt').pipe(filter), { delimiter : '|'})
 .on('record', function(row,index){
 	
 	// create dissertation ID if it is missing
@@ -72,25 +82,27 @@ csv()
   );
   disser_node.set( "style", "filled" );
 
-  console.log('#'+index+' '+ '-' + ' '+JSON.stringify(diss_id));
+  console.log('#'+index+' '+ '-' + ' '+JSON.stringify(diss_id) + ' ' + row.slice(10,13));
 
   // expects 3-element array of ФИО
   function add_person_node( ФИО ) {
 
-	  return g.addNode( translit(ФИО.join('')), {
-		  "label" : ФИО.join('\\n')
-	  } );
-	  
+	  if (ФИО[0].replace(/\s+/g, "")) 
+		  return g.addNode( translit(ФИО.join('')), {
+			  "label" : ФИО.join('\\n')
+		  } );
+	  else
+		  return null;
   }
   
   var author_node = add_person_node(row.slice(1,4));
   g.addEdge( author_node, disser_node );
   
-  var adv1_node = add_person_node(row.slice(8,11));
-  g.addEdge( adv1_node, disser_node );
+  var adv1_node = add_person_node(row.slice(10,13));
+  if (adv1_node) g.addEdge( adv1_node, disser_node );
 
-  var adv2_node = add_person_node(row.slice(11,14));
-  g.addEdge( adv2_node, disser_node );
+  var adv2_node = add_person_node(row.slice(13,16));
+  if (adv2_node) g.addEdge( adv2_node, disser_node );
 
 //  var opp1_node = add_person_node(row.slice(14,17));
 //  g.addEdge( opp1_node, disser_node );
