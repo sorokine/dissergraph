@@ -82,7 +82,7 @@ csv()
   );
   disser_node.set( "style", "filled" );
 
-  console.log('#'+index+' '+ '-' + ' '+JSON.stringify(diss_id) + ' ' + row.slice(10,13));
+  console.log('#'+index+' '+ '-' + ' '+JSON.stringify(diss_id) + ' ' + row.slice(16,19));
 
   // expects 3-element array of ФИО
   function add_person_node( ФИО ) {
@@ -96,30 +96,30 @@ csv()
   }
   
   var author_node = add_person_node(row.slice(1,4));
-  g.addEdge( author_node, disser_node );
+  g.addEdge( author_node, disser_node, { "penwidth" : "3", "weight" : 50} );
   
   var adv1_node = add_person_node(row.slice(10,13));
-  if (adv1_node) g.addEdge( adv1_node, disser_node );
+  if (adv1_node) g.addEdge( adv1_node, disser_node, { "penwidth" : "3", "color" : "green"});
 
   var adv2_node = add_person_node(row.slice(13,16));
-  if (adv2_node) g.addEdge( adv2_node, disser_node );
+  if (adv2_node) g.addEdge( adv2_node, disser_node, { "penwidth" : "2", "color" : "green"} );
 
-//  var opp1_node = add_person_node(row.slice(14,17));
-//  g.addEdge( opp1_node, disser_node );
-//
-//  var opp2_node = add_person_node(row.slice(17,20));
-//  g.addEdge( opp2_node, disser_node );
-//
-//  var opp3_node = add_person_node(row.slice(20,24));
-//  g.addEdge( opp3_node, disser_node );
+  var opp1_node = add_person_node(row.slice(16,19));
+  if (opp1_node) g.addEdge( opp1_node, disser_node, { "color" : "red" } );
+
+  var opp2_node = add_person_node(row.slice(19,22));
+  if (opp2_node) g.addEdge( opp2_node, disser_node, { "color" : "red" } );
+
+  var opp3_node = add_person_node(row.slice(22,25));
+  if (opp3_node) g.addEdge( opp3_node, disser_node, { "color" : "red" } );
 })
 .on('error', function(error){
   console.log(error.message);
 }).on('end', function(){
 	// Print the dot script
 	fs.writeFileSync( 'dissergraph.gv', g.to_dot() );
-	// Generate a PNG output
-	g.output( "png", "dissergraph.png" );
+	// Generate a other outputs
+	//g.output( "pdf", "dissergraph.pdf" );
 	console.log('done');
 });
 
